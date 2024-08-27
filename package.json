@@ -2,10 +2,10 @@
   "name": "express",
   "version": "0.0.1",
   "description": "",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node src/index.js",
-    "build": "rimraf build && babel src --out-dir build",
+    "dev": "nodemon --exec babel-node index.js",
+    "build": "rimraf build && babel --out-dir build index.js",
     "start": "node build/index.js"
   },
   "author": "Tolustar",

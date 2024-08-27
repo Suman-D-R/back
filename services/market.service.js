@@ -27,7 +27,7 @@ exports.addMarket = async (req, res) => {
       return res.status(400).send({ error: 'Market already exist' });
     }
     const market = new Market({
-      place: req.body.place
+      place: req.body.place,
     });
     await market.save();
     res.status(201).send({ market });
@@ -53,7 +53,7 @@ exports.addCategory = async (req, res) => {
       return res.status(400).send({ error: 'Category name is required' });
     }
     const category = new Category({
-      name: req.body.name
+      name: req.body.name,
     });
     await category.save();
     res.status(201).send({ category });
@@ -98,7 +98,7 @@ exports.addProduct = async (req, res) => {
     const product = new Product({
       name,
       categoryId: categoryIdArray,
-      imageURL
+      imageURL,
     });
 
     await product.save();
@@ -122,7 +122,7 @@ exports.getMarketByName = async (req, res) => {
 
     const products = latestPrices.map((lp) => ({
       product: lp.productId,
-      latestPrice: lp.price
+      latestPrice: lp.price,
     }));
 
     res.status(200).send({ market, products });
@@ -169,7 +169,7 @@ exports.addProductPrice = async (req, res) => {
     const marketPrice = new MarketPrice({
       productId,
       marketId: marketObj._id,
-      price
+      price,
     });
 
     await marketPrice.save();
@@ -179,7 +179,7 @@ exports.addProductPrice = async (req, res) => {
       { marketId: marketObj._id, productId },
       {
         $set: { price, updatedAt: Date.now() },
-        $setOnInsert: { previousPrice: null }
+        $setOnInsert: { previousPrice: null },
       },
       { upsert: true, new: true, runValidators: true }
     );
@@ -223,7 +223,7 @@ exports.getAllMarketProducts = async (req, res) => {
 
         return {
           market: market,
-          products: products
+          products: products,
         };
       })
     );
@@ -252,6 +252,6 @@ async function fetchLatestMarketPrices(marketId) {
 function processLatestMarketPrices(latestPrices) {
   return latestPrices.map((lp) => ({
     product: lp.productId,
-    currentPrice: lp.price
+    currentPrice: lp.price,
   }));
 }
