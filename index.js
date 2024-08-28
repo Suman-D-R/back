@@ -8,7 +8,7 @@ const routes = require('./routes');
 const database = require('./config/database');
 
 const app = express();
-const host = process.env.APP_HOST;
+// const host = process.env.APP_HOST;
 const port = process.env.APP_PORT;
 
 app.use(cors());
@@ -21,7 +21,7 @@ database();
 app.use(``, routes());
 
 app.listen(port, () => {
-  console.log(`Server started at ${host}:${port}/`);
+  // console.log(`Server started at ${host}:${port}/`);
 });
 
 module.exports = app;
