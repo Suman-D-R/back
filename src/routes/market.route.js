@@ -1,5 +1,6 @@
 const express = require('express');
 const marketService = require('../services/market.service');
+const upload = require('../services/uploadService');
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.post('/addCategory', marketService.addCategory);
 router.get('/categories', marketService.getCategories);
 
 //add product
-router.post('/addProduct', marketService.addProduct);
+router.post('/addProduct', upload.single('image'), marketService.addProduct);
 
 //get all products
 router.get('/products', marketService.getProducts);
@@ -32,5 +33,11 @@ router.post('/addProductPrice', marketService.addProductPrice);
 
 //get all market products
 router.get('/allMarketProducts', marketService.getAllMarketProducts);
+
+//get product price in all markets
+router.get(
+  '/productPriceInAllMarkets',
+  marketService.getProductPriceInAllMarkets
+);
 
 module.exports = router;

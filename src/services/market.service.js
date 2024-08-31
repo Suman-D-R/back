@@ -4,6 +4,10 @@ const Product = require('../models/product.model');
 const mongoose = require('mongoose');
 const MarketPrice = require('../models/marketPrice.model');
 const LatestMarketPrice = require('../models/latestMarketPrice.model');
+const { S3Client } = require('@aws-sdk/client-s3');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const upload = require('./uploadService');
 
 //get all markets
 exports.getAllMarkets = async (req, res) => {
@@ -73,15 +77,16 @@ exports.getCategories = async (req, res) => {
 };
 
 // Add product function
+
 exports.addProduct = async (req, res) => {
   try {
-    const { name, categoryId, imageURL } = req.body;
-
-    // Validate required fields
-    if (!name || !categoryId || !imageURL) {
-      return res
-        .status(400)
-        .json({ error: 'Product name, categoryId, and imageURL are required' });
+    const { name, categoryId } = req.body;
+    const imageUrl = req.file ? req.file.location : null;
+    console.log(name);
+    if (!name || !categoryId || !imageUrl) {
+      return res.status(400).json({
+        error: 'Product name, categoryId, and image are required',
+      });
     }
 
     // Ensure categoryId is an array, even if a single categoryId is provided
@@ -94,16 +99,21 @@ exports.addProduct = async (req, res) => {
       return res.status(400).json({ error: 'Invalid categoryId(s)' });
     }
 
-    // Create and save the product with multiple categories
-    const product = new Product({
-      name,
-      categoryId: categoryIdArray,
-      imageURL,
-    });
+    try {
+      // Create and save the product with multiple categories
+      const product = new Product({
+        name,
+        categoryId: categoryIdArray,
+        imageURL: imageUrl,
+      });
 
-    await product.save();
-    res.status(201).json({ product });
+      await product.save();
+      res.status(201).json({ product });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   } catch (error) {
+    console.error('Error in addProduct:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -136,33 +146,29 @@ exports.getMarketByName = async (req, res) => {
 exports.addProductPrice = async (req, res) => {
   try {
     const { productId, marketName, price } = req.body;
+
     const marketObj = await Market.findOne({ place: marketName });
 
-    if (!marketObj._id) {
-      return res.status(400).json({ error: 'market not found' });
+    if (!marketObj) {
+      return res.status(400).json({ error: 'Market not found' });
     }
+
     // Validate required fields
     if (!productId || !price) {
       return res
         .status(400)
-        .json({ error: 'productId, marketId, and price are required' });
+        .json({ error: 'productId and price are required' });
     }
 
-    // Validate that productId and marketId are valid ObjectIds
+    // Validate that productId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ error: 'Invalid productId or marketId' });
+      return res.status(400).json({ error: 'Invalid productId' });
     }
 
     // Check if the product exists
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
-    }
-
-    // Check if the market exists
-    const market = await Market.findById(marketObj._id);
-    if (!market) {
-      return res.status(404).json({ error: 'Market not found' });
     }
 
     // Create and save the market price
@@ -175,23 +181,30 @@ exports.addProductPrice = async (req, res) => {
     await marketPrice.save();
 
     // Update or create the latest market price
-    const latestPrice = await LatestMarketPrice.findOneAndUpdate(
-      { marketId: marketObj._id, productId },
-      {
-        $set: { price, updatedAt: Date.now() },
-        $setOnInsert: { previousPrice: null },
-      },
-      { upsert: true, new: true, runValidators: true }
-    );
+    const existingLatestPrice = await LatestMarketPrice.findOne({
+      marketId: marketObj._id,
+      productId,
+    });
 
-    if (latestPrice.previousPrice === null) {
-      latestPrice.previousPrice = price;
+    if (existingLatestPrice) {
+      // If a record exists, update it
+      if (existingLatestPrice.price !== price) {
+        existingLatestPrice.previousPrice = existingLatestPrice.price;
+        existingLatestPrice.price = price;
+        existingLatestPrice.updatedAt = Date.now();
+        await existingLatestPrice.save();
+      }
+      latestPrice = existingLatestPrice;
+    } else {
+      // If no record exists, create a new one
+      latestPrice = new LatestMarketPrice({
+        marketId: marketObj._id,
+        productId,
+        price,
+        previousPrice: price,
+        updatedAt: Date.now(),
+      });
       await latestPrice.save();
-    } else if (latestPrice.previousPrice !== price) {
-      await LatestMarketPrice.updateOne(
-        { _id: latestPrice._id },
-        { $set: { previousPrice: latestPrice.previousPrice } }
-      );
     }
 
     res.status(201).json({ marketPrice, latestPrice });
@@ -255,3 +268,44 @@ function processLatestMarketPrices(latestPrices) {
     currentPrice: lp.price,
   }));
 }
+
+//get product price in all markets
+exports.getProductPriceInAllMarkets = async (req, res) => {
+  try {
+    // Get all products
+    const products = await Product.find().lean();
+
+    // Get all latest market prices
+    const latestPrices = await LatestMarketPrice.find()
+      .populate('marketId')
+      .populate('productId')
+      .lean();
+
+    // Group prices by product
+    const productPrices = products.map((product) => {
+      const prices = latestPrices.filter(
+        (price) => price.productId._id.toString() === product._id.toString()
+      );
+
+      const marketPrices = prices.map((price) => ({
+        marketName: price.marketId.place,
+        price: price.price,
+        updatedAt: price.updatedAt,
+      }));
+
+      return {
+        product: {
+          _id: product._id,
+          name: product.name,
+          imageURL: product.imageURL,
+        },
+        marketPrices,
+      };
+    });
+
+    res.status(200).json({ productPrices });
+  } catch (error) {
+    console.error('Error in getProductPriceInAllMarkets:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
