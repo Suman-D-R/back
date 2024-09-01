@@ -290,7 +290,9 @@ exports.getProductPriceInAllMarkets = async (req, res) => {
       const marketPrices = prices.map((price) => ({
         marketName: price.marketId.place,
         price: price.price,
+        previousPrice: price.previousPrice,
         updatedAt: price.updatedAt,
+        baseUnit: price.baseUnit,
       }));
 
       return {
@@ -298,6 +300,7 @@ exports.getProductPriceInAllMarkets = async (req, res) => {
           _id: product._id,
           name: product.name,
           imageURL: product.imageURL,
+          baseUnit: product.baseUnit,
         },
         marketPrices,
       };
