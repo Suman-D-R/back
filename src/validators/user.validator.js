@@ -1,8 +1,9 @@
-import Joi from '@hapi/joi';
+const Joi = require('@hapi/joi');
 
-export const newUserValidator = (req, res, next) => {
+const newUserValidator = (req, res, next) => {
   const schema = Joi.object({
-    name: Joi.string().min(4).required()
+    name: Joi.string().min(4).required(),
+    password: Joi.string().min(8).required(),
   });
   const { error, value } = schema.validate(req.body);
   if (error) {
@@ -12,3 +13,5 @@ export const newUserValidator = (req, res, next) => {
     next();
   }
 };
+
+module.exports = { newUserValidator };
