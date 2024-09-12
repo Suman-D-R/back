@@ -5,11 +5,12 @@ const jwt = require('jsonwebtoken');
 //get all users
 exports.registerUser = async (req, res) => {
   try {
-    const user = new User(req.body);
+    const { name, password } = req.body;
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(user.password, salt);
-    await user.save();
-    res.status(201).send({ user });
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const user = new User({ name, password: hashedPassword });
+    const savedUser = await user.save();
+    res.status(201).send({ user: savedUser });
   } catch (error) {
     res.status(400).send(error);
   }
@@ -36,4 +37,20 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-//login a user
+//edit a user
+exports.editUser = async (req, res) => {
+  try {
+    const { name, password } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.data.id,
+      { name },
+      {
+        new: true,
+      }
+    );
+    res.status(200).send({ user });
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};

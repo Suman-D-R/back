@@ -3,7 +3,7 @@ const Joi = require('@hapi/joi');
 const newUserValidator = (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().min(4).required(),
-    password: Joi.string().min(8).required(),
+    password: Joi.string().min(4).required(),
   });
   const { error, value } = schema.validate(req.body);
   if (error) {
