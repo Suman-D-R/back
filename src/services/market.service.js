@@ -288,6 +288,7 @@ exports.getProductPriceInAllMarkets = async (req, res) => {
       );
 
       const marketPrices = prices.map((price) => ({
+        _id: price.marketId._id,
         marketName: price.marketId.place,
         price: price.price,
         previousPrice: price.previousPrice,
@@ -309,6 +310,34 @@ exports.getProductPriceInAllMarkets = async (req, res) => {
     res.status(200).json({ productPrices });
   } catch (error) {
     console.error('Error in getProductPriceInAllMarkets:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//get price history of a product by market
+exports.getPriceHistory = async (req, res) => {
+  try {
+    const marketId = req.params.marketId;
+    const productId = req.query.productId;
+
+    // console.log(marketId, productId);
+
+    if (!marketId && !productId) {
+      return res
+        .status(400)
+        .json({ error: 'MarketId or ProductId are required' });
+    }
+
+    const product = await Product.findById(productId);
+
+    const prices = await MarketPrice.find({
+      marketId: mongoose.Types.ObjectId(marketId),
+      productId: mongoose.Types.ObjectId(productId),
+    }).lean();
+
+    res.status(200).json({ prices, product });
+  } catch (error) {
+    console.error('Error in getPriceHistory:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
