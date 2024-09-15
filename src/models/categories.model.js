@@ -4,11 +4,12 @@ const CategoriesSchema = new Schema(
   {
     name: {
       type: String,
-      required: true
-    }
+      required: true,
+      enum: ['vegetables', 'fruit'],
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

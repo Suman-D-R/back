@@ -43,4 +43,10 @@ router.get(
 //get price history of a product by market
 router.get('/priceHistory/:marketId', marketService.getPriceHistory);
 
+//delete a market
+router.delete('/deleteMarket/:marketId', marketService.deleteMarket);
+
+//delete a product
+router.delete('/deleteProduct/:productId', marketService.deleteProduct);
+
 module.exports = router;

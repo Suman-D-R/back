@@ -6,25 +6,25 @@ const ProductSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true
+      unique: true,
     },
     categoryId: [
       {
         type: Schema.Types.ObjectId,
         required: true,
-        ref: 'Categories'
-      }
+        ref: 'Categories',
+      },
     ],
     baseUnit: {
       type: String,
       required: true,
       enum: ['kg', 'liter', 'piece', 'dozen'],
-      default: 'kg'
+      default: 'kg',
     },
     imageURL: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   { timestamps: true }
 );

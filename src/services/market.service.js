@@ -31,6 +31,7 @@ exports.addMarket = async (req, res) => {
       return res.status(400).send({ error: 'Market already exist' });
     }
     const market = new Market({
+      success: true,
       place: req.body.place,
     });
     await market.save();
@@ -80,7 +81,7 @@ exports.getCategories = async (req, res) => {
 
 exports.addProduct = async (req, res) => {
   try {
-    const { name, categoryId } = req.body;
+    const { name, categoryId, baseUnit } = req.body;
     const imageUrl = req.file ? req.file.location : null;
     console.log(name);
     if (!name || !categoryId || !imageUrl) {
@@ -105,6 +106,7 @@ exports.addProduct = async (req, res) => {
         name,
         categoryId: categoryIdArray,
         imageURL: imageUrl,
+        baseUnit: baseUnit,
       });
 
       await product.save();
@@ -145,12 +147,10 @@ exports.getMarketByName = async (req, res) => {
 // Add product price in market
 exports.addProductPrice = async (req, res) => {
   try {
-    const { productId, marketName, price } = req.body;
+    const { productId, marketId, price } = req.body;
 
-    const marketObj = await Market.findOne({ place: marketName });
-
-    if (!marketObj) {
-      return res.status(400).json({ error: 'Market not found' });
+    if (!marketId) {
+      return res.status(400).json({ error: 'MarketId is required' });
     }
 
     // Validate required fields
@@ -174,7 +174,7 @@ exports.addProductPrice = async (req, res) => {
     // Create and save the market price
     const marketPrice = new MarketPrice({
       productId,
-      marketId: marketObj._id,
+      marketId,
       price,
     });
 
@@ -182,7 +182,7 @@ exports.addProductPrice = async (req, res) => {
 
     // Update or create the latest market price
     const existingLatestPrice = await LatestMarketPrice.findOne({
-      marketId: marketObj._id,
+      marketId,
       productId,
     });
 
@@ -198,7 +198,7 @@ exports.addProductPrice = async (req, res) => {
     } else {
       // If no record exists, create a new one
       latestPrice = new LatestMarketPrice({
-        marketId: marketObj._id,
+        marketId,
         productId,
         price,
         previousPrice: price,
@@ -338,6 +338,30 @@ exports.getPriceHistory = async (req, res) => {
     res.status(200).json({ prices, product });
   } catch (error) {
     console.error('Error in getPriceHistory:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//delete a market
+exports.deleteMarket = async (req, res) => {
+  try {
+    const marketId = req.params.marketId;
+    await Market.findByIdAndDelete(marketId);
+    res.status(200).json({ message: 'Market deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteMarket:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//delete a product
+exports.deleteProduct = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    await Product.findByIdAndDelete(productId);
+    res.status(200).json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteProduct:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
