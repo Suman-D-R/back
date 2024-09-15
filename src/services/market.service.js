@@ -178,7 +178,9 @@ exports.addProductPrice = async (req, res) => {
       price,
     });
 
-    await marketPrice.save();
+    const savedMarketPrice = await marketPrice.save();
+
+    console.log(savedMarketPrice);
 
     // Update or create the latest market price
     const existingLatestPrice = await LatestMarketPrice.findOne({
@@ -200,10 +202,12 @@ exports.addProductPrice = async (req, res) => {
       latestPrice = new LatestMarketPrice({
         marketId,
         productId,
+        marketProductId: savedMarketPrice._id,
         price,
         previousPrice: price,
         updatedAt: Date.now(),
       });
+      console.log(latestPrice);
       await latestPrice.save();
     }
 
@@ -362,6 +366,105 @@ exports.deleteProduct = async (req, res) => {
     res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error in deleteProduct:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//get all price by particular market product
+exports.getAllPriceByMarketProduct = async (req, res) => {
+  try {
+    const marketProductId = req.params.marketProductId;
+    const productId = req.query.productId;
+    const prices = await MarketPrice.find({
+      marketId: mongoose.Types.ObjectId(marketProductId),
+      productId: mongoose.Types.ObjectId(productId),
+    });
+    res.status(200).json({ prices });
+  } catch (error) {
+    // console.error('Error in getAllPriceByMarketProduct:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//delete a market product price
+exports.deleteMarketProductPrice = async (req, res) => {
+  try {
+    const marketProductPriceId = req.params.marketProductPriceId;
+
+    // Delete from MarketPrice
+    const deletedPrice = await MarketPrice.findByIdAndDelete(
+      marketProductPriceId
+    );
+
+    if (!deletedPrice) {
+      return res.status(404).json({ error: 'Market product price not found' });
+    }
+
+    // Find the latest price for this product and market
+    const latestPrice = await MarketPrice.findOne({
+      productId: deletedPrice.productId,
+      marketId: deletedPrice.marketId,
+    }).sort({ createdAt: -1 });
+
+    if (latestPrice) {
+      // Update LatestMarketPrice with the new latest price
+      await LatestMarketPrice.findOneAndUpdate(
+        { productId: deletedPrice.productId, marketId: deletedPrice.marketId },
+        {
+          price: latestPrice.price,
+          previousPrice: deletedPrice.price,
+          updatedAt: Date.now(),
+        },
+        { new: true, upsert: true }
+      );
+    } else {
+      // If no prices left, delete the LatestMarketPrice entry
+      await LatestMarketPrice.findOneAndDelete({
+        productId: deletedPrice.productId,
+        marketId: deletedPrice.marketId,
+      });
+    }
+
+    res
+      .status(200)
+      .json({ message: 'Market product price deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteMarketProductPrice:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//update a market product price
+exports.updateMarketProductPrice = async (req, res) => {
+  try {
+    const marketProductPriceId = req.params.marketProductPriceId;
+    const { price } = req.body;
+
+    // Update MarketPrice
+    const updatedPrice = await MarketPrice.findByIdAndUpdate(
+      marketProductPriceId,
+      { price },
+      { new: true }
+    );
+
+    if (!updatedPrice) {
+      return res.status(404).json({ error: 'Market product price not found' });
+    }
+
+    // Update LatestMarketPrice
+    const latestPrice = await LatestMarketPrice.findOneAndUpdate(
+      { productId: updatedPrice.productId, marketId: updatedPrice.marketId },
+      {
+        price: price,
+        previousPrice: updatedPrice.price,
+        updatedAt: Date.now(),
+      },
+      { new: true, upsert: true }
+    );
+
+    res.status(200).json({ updatedPrice, latestPrice });
+  } catch (error) {
+    console.error('Error in updateMarketProductPrice:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

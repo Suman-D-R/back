@@ -49,4 +49,22 @@ router.delete('/deleteMarket/:marketId', marketService.deleteMarket);
 //delete a product
 router.delete('/deleteProduct/:productId', marketService.deleteProduct);
 
+//get all price by particular market product
+router.get(
+  '/allPriceByMarketProduct/:marketProductId',
+  marketService.getAllPriceByMarketProduct
+);
+
+//delete a market product price
+router.delete(
+  '/deleteMarketProductPrice/:marketProductPriceId',
+  marketService.deleteMarketProductPrice
+);
+
+//update a market product price
+router.put(
+  '/updateMarketProductPrice/:marketProductPriceId',
+  marketService.updateMarketProductPrice
+);
+
 module.exports = router;
