@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "dev": "nodemon --exec babel-node src/index.js",
-    "build": "node src/index.js",
+    "build": "rimraf build && babel src --out-dir build && copyfiles -u 1 'src/**/*.json' build",
     "prestart": "rimraf build && babel src --out-dir build",
     "start": "node build/index.js",
     "lint": "eslint . --ext .js",
