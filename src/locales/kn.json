@@ -1,28 +1,6 @@
 {
-	"products": {
-		"tomato": "ಟೊಮ್ಯಾಟೋ",
-		"carrot": "ಕ್ಯಾರಟ್",
-		"garlic": "ಬೆಳ್ಳುಳ್ಳಿ",
-		"potato": "ಆಲೂಗಡ್ಡೆ",
-		"ginger": "ಅದ್ದಿ",
-		"cucumber": "ಸೌತೇಕಾಯಿ",
-		"radish": "ಮೂಲಂಗಿ",
-		"capsicum": "ಕ್ಯಾಪ್ಸಿಕಮ್",
-		"beetroot": "ಬೀಟ್‌ರೂಟ್",
-		"lemon": "ನಿಂಬೆ"
-	},
-	"Products": {
-		"tomato": "ಟೊಮ್ಯಾಟೋ",
-		"carrot": "ಕ್ಯಾರಟ್",
-		"garlic": "ಬೆಳ್ಳುಳ್ಳಿ",
-		"potato": "ಆಲೂಗಡ್ಡೆ",
-		"ginger": "ಅದ್ದಿ",
-		"cucumber": "ಸೌತೇಕಾಯಿ",
-		"radish": "ಮೂಲಂಗಿ",
-		"capsicum": "ಕ್ಯಾಪ್ಸಿಕಮ್",
-		"beetroot": "ಬೀಟ್‌ರೂಟ್",
-		"lemon": "ನಿಂಬೆ"
-	},
+	"products.tomato": "ಟೊಮ್ಯಾಟೋ",
+	"products.carrot": "ಕ್ಯಾರಟ್",
 	"products.garlic": "ಬೆಳ್ಳುಳ್ಳಿ",
 	"products.potato": "ಆಲೂಗಡ್ಡೆ",
 	"products.ginger": "ಅದ್ದಿ",
