@@ -2,10 +2,11 @@
   "name": "express",
   "version": "0.0.1",
   "description": "",
-  "main": "build/index.js",
+  "main": "src/index.js",
   "scripts": {
     "dev": "nodemon node src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "pnpm install"
   },
   "author": "Tolustar",
   "license": "MIT",
