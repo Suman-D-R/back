@@ -40,6 +40,12 @@ router.get(
   marketService.getProductPriceInAllMarkets
 );
 
+//get product price in all markets by product id
+router.get(
+  '/productPriceInAllMarkets/:productId',
+  marketService.getProductPriceInAllMarketsByProductId
+);
+
 //get price history of a product by market
 router.get('/priceHistory/:marketId', marketService.getPriceHistory);
 

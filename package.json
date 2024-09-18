@@ -25,6 +25,7 @@
     "express": "^4.17.1",
     "helmet": "^4.1.0",
     "http-status-codes": "^2.1.2",
+    "i18n": "^0.15.1",
     "jsonwebtoken": "^8.5.1",
     "mailgun-js": "^0.22.0",
     "mongodb": "^6.8.0",

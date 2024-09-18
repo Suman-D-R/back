@@ -4,10 +4,7 @@ const Product = require('../models/product.model');
 const mongoose = require('mongoose');
 const MarketPrice = require('../models/marketPrice.model');
 const LatestMarketPrice = require('../models/latestMarketPrice.model');
-const { S3Client } = require('@aws-sdk/client-s3');
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-const upload = require('./uploadService');
+const i18n = require('i18n');
 
 //get all markets
 exports.getAllMarkets = async (req, res) => {
@@ -221,25 +218,47 @@ exports.addProductPrice = async (req, res) => {
 //get all products
 exports.getProducts = async (req, res) => {
   try {
+    // Fetch language preference from query parameters or set a default
+    const lang = req.query.lang || 'en';
+    i18n.setLocale(lang);
+
+    // Fetch all products from the database
     const products = await Product.find();
-    res.status(200).send({ products });
+
+    // Translate product names
+    const translatedProducts = products.map((product) => ({
+      ...product.toObject(),
+      name: i18n.__(
+        `products.${product.name.toLowerCase().replace(/\s+/g, '')}`
+      ), // Translate the name field using the key
+    }));
+
+    res.status(200).json({ products: translatedProducts });
   } catch (error) {
-    res.status(400).send(error);
+    console.error('Error while fetching products:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 
 // get all market products
 exports.getAllMarketProducts = async (req, res) => {
   try {
+    const lang = req.query.lang || 'en';
+    i18n.setLocale(lang);
+
     const markets = await Market.find();
 
     const marketProducts = await Promise.all(
       markets.map(async (market) => {
         const latestPrices = await fetchLatestMarketPrices(market._id);
-        const products = processLatestMarketPrices(latestPrices);
-
+        const products = processLatestMarketPrices(latestPrices, lang);
         return {
-          market: market,
+          market: {
+            ...market.toObject(),
+            place: i18n.__(
+              `markets.${market.place.toLowerCase().replace(/\s+/g, '')}`
+            ),
+          },
           products: products,
         };
       })
@@ -266,10 +285,16 @@ async function fetchLatestMarketPrices(marketId) {
   }
 }
 
-function processLatestMarketPrices(latestPrices) {
+function processLatestMarketPrices(latestPrices, lang) {
   return latestPrices.map((lp) => ({
-    product: lp.productId,
+    product: {
+      ...lp.productId,
+      name: i18n.__(
+        `products.${lp.productId.name.toLowerCase().replace(/\s+/g, '')}`
+      ),
+    },
     currentPrice: lp.price,
+    date: lp.updatedAt,
   }));
 }
 
@@ -277,6 +302,9 @@ function processLatestMarketPrices(latestPrices) {
 exports.getProductPriceInAllMarkets = async (req, res) => {
   try {
     // Get all products
+    const lang = req.query.lang || 'en';
+    i18n.setLocale(lang);
+
     const products = await Product.find().lean();
 
     // Get all latest market prices
@@ -293,7 +321,9 @@ exports.getProductPriceInAllMarkets = async (req, res) => {
 
       const marketPrices = prices.map((price) => ({
         _id: price.marketId._id,
-        marketName: price.marketId.place,
+        marketName: i18n.__(
+          `markets.${price.marketId.place.toLowerCase().replace(/\s+/g, '')}`
+        ),
         price: price.price,
         previousPrice: price.previousPrice,
         updatedAt: price.updatedAt,
@@ -303,7 +333,9 @@ exports.getProductPriceInAllMarkets = async (req, res) => {
       return {
         product: {
           _id: product._id,
-          name: product.name,
+          name: i18n.__(
+            `products.${product.name.toLowerCase().replace(/\s+/g, '')}`
+          ),
           imageURL: product.imageURL,
           baseUnit: product.baseUnit,
         },
@@ -465,6 +497,56 @@ exports.updateMarketProductPrice = async (req, res) => {
     res.status(200).json({ updatedPrice, latestPrice });
   } catch (error) {
     console.error('Error in updateMarketProductPrice:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+//get product price in all markets by product id
+exports.getProductPriceInAllMarketsByProductId = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    // Fetch language preference from query parameters or set a default
+    const lang = req.query.lang || 'en';
+    i18n.setLocale(lang);
+
+    // Fetch product data
+    const product = await Product.findById(productId).lean();
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Fetch prices with market data
+    const prices = await LatestMarketPrice.find({ productId })
+      .populate('marketId', 'place')
+      .lean();
+
+    const pricesWithMarketData = prices.map((price) => ({
+      _id: price._id,
+      price: price.price,
+      previousPrice: price.previousPrice,
+      updatedAt: price.updatedAt,
+      market: {
+        _id: price.marketId._id,
+        place: i18n.__(
+          `markets.${price.marketId.place.toLowerCase().replace(/\s+/g, '')}`
+        ),
+      },
+    }));
+
+    res.status(200).json({
+      product: {
+        _id: product._id,
+        name: i18n.__(
+          `products.${product.name.toLowerCase().replace(/\s+/g, '')}`
+        ), // Translate the product name
+        imageURL: product.imageURL,
+        baseUnit: product.baseUnit,
+        categoryId: product.categoryId,
+      },
+      prices: pricesWithMarketData,
+    });
+  } catch (error) {
+    console.error('Error in getProductPriceInAllMarketsByProductId:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
