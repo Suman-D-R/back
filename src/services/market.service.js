@@ -338,6 +338,8 @@ exports.getProductPriceInAllMarkets = async (req, res) => {
           ),
           imageURL: product.imageURL,
           baseUnit: product.baseUnit,
+          priority: product.priority,
+          isInDemand: product.isInDemand,
         },
         marketPrices,
       };
@@ -355,6 +357,8 @@ exports.getPriceHistory = async (req, res) => {
   try {
     const marketId = req.params.marketId;
     const productId = req.query.productId;
+    const lang = req.query.lang || 'en';
+    i18n.setLocale(lang);
 
     // console.log(marketId, productId);
 
@@ -365,6 +369,10 @@ exports.getPriceHistory = async (req, res) => {
     }
 
     const product = await Product.findById(productId);
+
+    product.name = i18n.__(
+      `products.${product.name.toLowerCase().replace(/\s+/g, '')}`
+    );
 
     const prices = await MarketPrice.find({
       marketId: mongoose.Types.ObjectId(marketId),
@@ -542,6 +550,8 @@ exports.getProductPriceInAllMarketsByProductId = async (req, res) => {
         imageURL: product.imageURL,
         baseUnit: product.baseUnit,
         categoryId: product.categoryId,
+        priority: product.priority,
+        isInDemand: product.isInDemand,
       },
       prices: pricesWithMarketData,
     });

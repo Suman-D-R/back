@@ -25,6 +25,15 @@ const ProductSchema = new Schema(
       type: String,
       required: true,
     },
+    priority: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
+    isInDemand: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

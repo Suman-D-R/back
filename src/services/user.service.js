@@ -19,7 +19,6 @@ exports.registerUser = async (req, res) => {
 //login a user
 exports.loginUser = async (req, res) => {
   try {
-    console.log(req.body);
     const user = await User.findOne({ name: req.body.name });
 
     if (!user) {
