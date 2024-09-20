@@ -144,73 +144,86 @@ exports.getMarketByName = async (req, res) => {
 // Add product price in market
 exports.addProductPrice = async (req, res) => {
   try {
-    const { productId, marketId, price } = req.body;
+    const { marketId, products, date } = req.body;
 
     if (!marketId) {
       return res.status(400).json({ error: 'MarketId is required' });
     }
 
-    // Validate required fields
-    if (!productId || !price) {
+    if (!Array.isArray(products) || products.length === 0) {
       return res
         .status(400)
-        .json({ error: 'productId and price are required' });
+        .json({ error: 'Products array is required and must not be empty' });
     }
 
-    // Validate that productId is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ error: 'Invalid productId' });
-    }
+    const results = [];
 
-    // Check if the product exists
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+    for (const product of products) {
+      const { productId, price } = product;
 
-    // Create and save the market price
-    const marketPrice = new MarketPrice({
-      productId,
-      marketId,
-      price,
-    });
-
-    const savedMarketPrice = await marketPrice.save();
-
-    console.log(savedMarketPrice);
-
-    // Update or create the latest market price
-    const existingLatestPrice = await LatestMarketPrice.findOne({
-      marketId,
-      productId,
-    });
-
-    if (existingLatestPrice) {
-      // If a record exists, update it
-      if (existingLatestPrice.price !== price) {
-        existingLatestPrice.previousPrice = existingLatestPrice.price;
-        existingLatestPrice.price = price;
-        existingLatestPrice.updatedAt = Date.now();
-        await existingLatestPrice.save();
+      if (!productId || !price) {
+        return res
+          .status(400)
+          .json({ error: 'Each product must have productId and price' });
       }
-      latestPrice = existingLatestPrice;
-    } else {
-      // If no record exists, create a new one
-      latestPrice = new LatestMarketPrice({
+
+      if (!mongoose.Types.ObjectId.isValid(productId)) {
+        return res
+          .status(400)
+          .json({ error: `Invalid productId: ${productId}` });
+      }
+
+      // Check if the product exists
+      const existingProduct = await Product.findById(productId);
+      if (!existingProduct) {
+        return res
+          .status(404)
+          .json({ error: `Product not found: ${productId}` });
+      }
+
+      // Create and save the market price
+      const marketPrice = new MarketPrice({
+        productId,
+        marketId,
+        price,
+        date,
+      });
+
+      const savedMarketPrice = await marketPrice.save();
+
+      // Update or create the latest market price
+      let latestPrice = await LatestMarketPrice.findOne({
         marketId,
         productId,
-        marketProductId: savedMarketPrice._id,
-        price,
-        previousPrice: price,
-        updatedAt: Date.now(),
       });
-      console.log(latestPrice);
-      await latestPrice.save();
+
+      if (latestPrice) {
+        // If a record exists, update it
+        if (latestPrice.price !== price) {
+          latestPrice.previousPrice = latestPrice.price;
+          latestPrice.price = price;
+          latestPrice.updatedAt = new Date(date) || Date.now();
+          await latestPrice.save();
+        }
+      } else {
+        // If no record exists, create a new one
+        latestPrice = new LatestMarketPrice({
+          marketId,
+          productId,
+          marketProductId: savedMarketPrice._id,
+          price,
+          previousPrice: price,
+          updatedAt: new Date(date) || Date.now(),
+        });
+        await latestPrice.save();
+      }
+
+      results.push({ marketPrice: savedMarketPrice, latestPrice });
     }
 
-    res.status(201).json({ marketPrice, latestPrice });
+    res.status(201).json({ results });
   } catch (error) {
-    console.error('Error while adding market price:', error);
+    console.error('Error while adding market prices:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -517,6 +530,7 @@ exports.getProductPriceInAllMarketsByProductId = async (req, res) => {
     const lang = req.query.lang || 'en';
     i18n.setLocale(lang);
 
+    console.log(req.params.productId);
     // Fetch product data
     const product = await Product.findById(productId).lean();
     if (!product) {
@@ -529,14 +543,14 @@ exports.getProductPriceInAllMarketsByProductId = async (req, res) => {
       .lean();
 
     const pricesWithMarketData = prices.map((price) => ({
-      _id: price._id,
-      price: price.price,
-      previousPrice: price.previousPrice,
-      updatedAt: price.updatedAt,
+      _id: price?._id,
+      price: price?.price,
+      previousPrice: price?.previousPrice,
+      updatedAt: price?.updatedAt,
       market: {
-        _id: price.marketId._id,
+        _id: price?.marketId?._id,
         place: i18n.__(
-          `markets.${price.marketId.place.toLowerCase().replace(/\s+/g, '')}`
+          `markets.${price?.marketId?.place.toLowerCase().replace(/\s+/g, '')}`
         ),
       },
     }));
