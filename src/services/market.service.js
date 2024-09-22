@@ -80,7 +80,6 @@ exports.addProduct = async (req, res) => {
   try {
     const { name, categoryId, baseUnit } = req.body;
     const imageUrl = req.file ? req.file.location : null;
-    console.log(name);
     if (!name || !categoryId || !imageUrl) {
       return res.status(400).json({
         error: 'Product name, categoryId, and image are required',
@@ -530,7 +529,7 @@ exports.getProductPriceInAllMarketsByProductId = async (req, res) => {
     const lang = req.query.lang || 'en';
     i18n.setLocale(lang);
 
-    console.log(req.params.productId);
+    // console.log(req.params.productId);
     // Fetch product data
     const product = await Product.findById(productId).lean();
     if (!product) {

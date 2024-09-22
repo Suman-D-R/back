@@ -11,12 +11,12 @@
 	"products.pumpkin": "pumpkin",
 	"products.cabbage": "cabbage",
 	"products.coliflower": "coliflower",
-	"markets.benglore": "benglore",
+	"markets.benglore": "Bengaluru",
 	"markets.kushalnagar": "kushalnagar",
 	"markets.mysore": "mysore",
 	"markets.hassan": "hassan",
 	"products.tomato": "tomato",
-	"products.bangalorecarrot": "bangalore carrot",
+	"products.bangalorecarrot": "Bengaluru carrot",
 	"products.potato": "potato",
 	"products.alankartomato": "alankar tomato",
 	"products.whitecocumber": "white cocumber",
@@ -25,6 +25,5 @@
 	"products.ladyfinger": "ladyfinger",
 	"products.greenchilly": "greenchilly",
 	"products.mintleaves": "mintleaves",
-	"products.greenbeens": "greenbeens",
-	"markets.undefined": "markets.undefined"
+	"products.greenbeens": "greenbeens"
 }
