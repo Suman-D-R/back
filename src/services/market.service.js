@@ -78,7 +78,7 @@ exports.getCategories = async (req, res) => {
 
 exports.addProduct = async (req, res) => {
   try {
-    const { name, categoryId, baseUnit } = req.body;
+    const { name, categoryId, baseUnit, priority, isInDemand } = req.body;
     const imageUrl = req.file ? req.file.location : null;
     if (!name || !categoryId || !imageUrl) {
       return res.status(400).json({
@@ -103,6 +103,8 @@ exports.addProduct = async (req, res) => {
         categoryId: categoryIdArray,
         imageURL: imageUrl,
         baseUnit: baseUnit,
+        priority,
+        isInDemand,
       });
 
       await product.save();
