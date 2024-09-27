@@ -10,7 +10,7 @@
 	"products.lemon": "lemon",
 	"products.pumpkin": "pumpkin",
 	"products.cabbage": "cabbage",
-	"products.coliflower": "coliflower",
+	"products.coliflower": "caoliflower",
 	"markets.benglore": "Bengaluru",
 	"markets.kushalnagar": "kushalnagar",
 	"markets.mysore": "mysore",
@@ -37,5 +37,7 @@
 	"products.ivygourd": "Ivy Gourd",
 	"products.yardlongbeans": "Yard Long Beans",
 	"products.pintobeans": "Pinto Beans",
-	"products.brinjalgreen": "Brinjal Green"
+	"products.brinjalgreen": "Brinjal Green",
+	"products.waxgourd": "Wax Gourd",
+	"products.ashgourd": "Ash Gourd"
 }

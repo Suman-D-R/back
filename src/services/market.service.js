@@ -118,6 +118,30 @@ exports.addProduct = async (req, res) => {
   }
 };
 
+//update product by id
+exports.updateProduct = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const { name, categoryId, baseUnit, priority, isInDemand } = req.body;
+    const imageUrl = req.file ? req.file.location : null;
+
+    console.log(imageUrl);
+
+    const product = await Product.findByIdAndUpdate(productId, {
+      name,
+      categoryId,
+      baseUnit,
+      priority,
+      isInDemand,
+      ...(imageUrl && { imageURL: imageUrl }),
+    });
+
+    res.status(200).json({ product });
+  } catch (error) {
+    console.error('Error in updateProduct:', error);
+  }
+};
+
 //get market by name
 exports.getMarketByName = async (req, res) => {
   try {

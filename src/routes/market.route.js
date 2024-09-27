@@ -25,6 +25,13 @@ router.get('/categories', marketService.getCategories);
 //add product
 router.post('/addProduct', upload.single('image'), marketService.addProduct);
 
+//update product by id
+router.put(
+  '/updateProduct/:productId',
+  upload.single('image'),
+  marketService.updateProduct
+);
+
 //get all products
 router.get('/products', marketService.getProducts);
 
