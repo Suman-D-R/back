@@ -24,7 +24,6 @@ const latestMarketPriceSchema = new mongoose.Schema({
     type: Number,
     default: null,
   },
-  baseUnit: String,
   updatedAt: {
     type: Date,
     default: Date.now,

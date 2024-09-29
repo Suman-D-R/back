@@ -125,8 +125,6 @@ exports.updateProduct = async (req, res) => {
     const { name, categoryId, baseUnit, priority, isInDemand } = req.body;
     const imageUrl = req.file ? req.file.location : null;
 
-    console.log(imageUrl);
-
     const product = await Product.findByIdAndUpdate(productId, {
       name,
       categoryId,
