@@ -14,11 +14,11 @@ const port = process.env.APP_PORT;
 
 // Configure i18n
 i18n.configure({
-  locales: ['en', 'kn'], // Add your supported locales here
-  directory: __dirname + '/locales', // Path to your translation files
-  defaultLocale: 'kn', // Default locale
-  cookie: 'your-cookie-name', // Optional: cookie name for storing locale
-  queryParameter: 'lang', // Optional: query parameter for locale
+  locales: ['en', 'kn'],
+  directory: __dirname + '/locales',
+  defaultLocale: 'en',
+  cookie: 'your-cookie-name',
+  queryParameter: 'lang',
   autoReload: true, // Optional: auto reload translations when files change
   syncFiles: true, // Optional: sync translations between files
   logWarnFn: (msg) => console.warn(msg), // Optional: function to log warnings

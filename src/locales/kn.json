@@ -15,10 +15,10 @@
 	"markets.kushalnagar": "ಕುಶಾಲನಗರ",
 	"markets.mysore": "ಮೈಸೂರು",
 	"markets.hassan": "ಹಾಸನ",
-	"products.tomato": "ಟೊಮ್ಯಾಟೊ",
+	"products.tomato": "ಟೊಮೆಟೊ",
 	"products.bangalorecarrot": "ಬೆಂಗಳೂರು ಕ್ಯಾರಟ್",
 	"products.potato": "ಆಲೂಗಡ್ಡೆ",
-	"products.alankartomato": "ಅಲಂಕಾರ ಟೊಮ್ಯಾಟೊ",
+	"products.alankartomato": "ಅಲಂಕಾರ ಟೊಮೆಟೊ",
 	"products.whitecocumber": "ಬಿಳಿ ಸೌತೆಕಾಯಿ",
 	"products.corianderleaves": "ಕೊತ್ತಂಬರಿ ಸೊಪ್ಪು",
 	"products.blackbrinjal": "ಕಪ್ಪು ಬದನೇಕಾಯಿ",
@@ -47,5 +47,6 @@
 	"products.sweetpotato": "ಸ್ವೀಟ",
 	"products.tapioca": "ಮರಗೆಣಸು",
 	"products.palak": "ಪಾಲಾಕ್",
-	"products.drumstick": "ನುಗ್ಗೆಕಾಯಿ"
+	"products.drumstick": "ನುಗ್ಗೆಕಾಯಿ",
+	"products.kohlrabi": "ನವಿಲುಕೋಸು"
 }

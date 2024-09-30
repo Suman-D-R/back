@@ -225,7 +225,7 @@ exports.addProductPrice = async (req, res) => {
         if (latestPrice.price !== price) {
           latestPrice.previousPrice = latestPrice.price;
           latestPrice.price = price;
-          latestPrice.updatedAt = new Date(date) || Date.now();
+          latestPrice.updatedAt = date || Date.now();
           await latestPrice.save();
         }
       } else {
@@ -236,7 +236,7 @@ exports.addProductPrice = async (req, res) => {
           marketProductId: savedMarketPrice._id,
           price,
           previousPrice: price,
-          updatedAt: new Date(date) || Date.now(),
+          updatedAt: date || Date.now(),
         });
         await latestPrice.save();
       }
@@ -489,7 +489,7 @@ exports.deleteMarketProductPrice = async (req, res) => {
         {
           price: latestPrice.price,
           previousPrice: deletedPrice.price,
-          updatedAt: Date.now(),
+          updatedAt: latestPrice.updatedAt,
         },
         { new: true, upsert: true }
       );
@@ -514,12 +514,12 @@ exports.deleteMarketProductPrice = async (req, res) => {
 exports.updateMarketProductPrice = async (req, res) => {
   try {
     const marketProductPriceId = req.params.marketProductPriceId;
-    const { price } = req.body;
+    const { price, date } = req.body;
 
     // Update MarketPrice
     const updatedPrice = await MarketPrice.findByIdAndUpdate(
       marketProductPriceId,
-      { price },
+      { price, date },
       { new: true }
     );
 
@@ -533,7 +533,7 @@ exports.updateMarketProductPrice = async (req, res) => {
       {
         price: price,
         previousPrice: updatedPrice.price,
-        updatedAt: Date.now(),
+        updatedAt: date || Date.now(),
       },
       { new: true, upsert: true }
     );
