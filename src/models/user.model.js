@@ -14,6 +14,9 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    phoneNumber: {
+      type: String,
+    },
     userType: {
       type: String,
       enum: ['admin', 'user'],

@@ -1,9 +1,18 @@
 const { Schema, model } = require('mongoose');
 
 const productDetailsSchema = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   productId: {
     type: Schema.Types.ObjectId,
     ref: 'Product',
+    required: true,
+  },
+  name: {
+    type: String,
     required: true,
   },
   quantityFrom: {
@@ -14,6 +23,10 @@ const productDetailsSchema = new Schema({
     type: Number,
     required: true,
   },
+  address: {
+    type: String,
+    required: true,
+  },
   location: {
     type: String,
     required: true,
@@ -21,6 +34,20 @@ const productDetailsSchema = new Schema({
   description: {
     type: String,
     trim: true,
+  },
+  images: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  isSeller: {
+    type: Boolean,
+    default: true,
   },
   createdAt: {
     type: Date,
