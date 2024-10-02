@@ -489,7 +489,7 @@ exports.deleteMarketProductPrice = async (req, res) => {
         {
           price: latestPrice.price,
           previousPrice: deletedPrice.price,
-          updatedAt: latestPrice.updatedAt,
+          updatedAt: latestPrice.date,
         },
         { new: true, upsert: true }
       );
